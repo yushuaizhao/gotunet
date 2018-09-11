@@ -11,17 +11,18 @@ import (
 	"time"
 )
 
-func DoLogin(user,passwd string)(error){
+//DoLogin 进行登录操作，返回error
+func DoLogin(user, passwd string) error {
 	log.Println("*Do login")
-	logInfo,err := login(user,passwd)
-	i:=0
+	logInfo, err := login(user, passwd)
+	i := 0
 	for err != nil {
-		if logInfo == "IP has been online, please logout."{
+		if logInfo == "IP has been online, please logout." {
 			break
 		}
 		log.Println(err)
 		time.Sleep(time.Duration(20) * time.Second)
-		logInfo,err = login(user,passwd)
+		logInfo, err = login(user, passwd)
 		if i > 9 {
 			return fmt.Errorf("多次尝试无果 " + logInfo)
 		}
@@ -31,9 +32,9 @@ func DoLogin(user,passwd string)(error){
 	return nil
 }
 
-func login(user,passwd string) (string,error) {
+func login(user, passwd string) (string, error) {
 	h := md5.New()
-	io.WriteString(h,passwd)
+	io.WriteString(h, passwd)
 	MD5 := hex.EncodeToString(h.Sum(nil))
 	data := map[string][]string{
 		"action":   {"login"},
@@ -44,17 +45,17 @@ func login(user,passwd string) (string,error) {
 	logInfo, err := http.PostForm("https://auth4.tsinghua.edu.cn/do_login.php", data)
 	if err != nil {
 		log.Println("can't login")
-		return "",err
+		return "", err
 	}
 	loginByte, err := ioutil.ReadAll(logInfo.Body)
 	defer logInfo.Body.Close()
 	if err != nil {
 		log.Println("can't login ")
-		return "",err
+		return "", err
 	}
 	loginInfo := string(loginByte)
-	if loginInfo != "Login is successful."{
-		return loginInfo,fmt.Errorf(loginInfo)
+	if loginInfo != "Login is successful." {
+		return loginInfo, fmt.Errorf(loginInfo)
 	}
-	return loginInfo,nil
+	return loginInfo, nil
 }
